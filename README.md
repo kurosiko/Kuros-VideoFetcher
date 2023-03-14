@@ -1,84 +1,90 @@
-#VideoFetcher
-This is a YouTube downloader created using yt-dlp. The available options upon startup are expressed with the ">" symbol, and their details with the "・" symbol. The settings are automatically saved to config.ini.
+| VideoFetcher |
+<img width="302" alt="スクリーンショット 2023-03-14 230005" src="https://user-images.githubusercontent.com/101198724/225025920-8de58130-f76d-4347-b0aa-589e478c560e.png">
 
-FFmpeg.exe and FFprobe.exe are included in the .zip file, so they do not need to be added to the PATH.
+This is a YouTube downloader created using yt-dlp (Python).
 
-|OPTIONS|###############################################################
+Settings are automatically saved in config.ini.
 
-    OUTPUT
-    Selects the working directory, where subdirectory will be generated.
+Note that FFmpeg.exe and FFprobe.exe are used. You do not need to set environment variables, but it is recommended that you place them in the same location as the downloader.
 
-    FOLDER
-    Configures the folder generation settings. If all options are enabled, the folder structure will be as follows (the [] part may vary depending on the context):
+Automatic updates are not available.
 
-[Selected output folder]
-└─dl_videos
-├─Playlist
-│ └─[Playlist title]
-└─[uploader]
+| OPTIONS | ###############################################################
 
-The options for generating the folders are:
-・DL FOLDER: Generates the 'dl_videos' folder.
-・UPLOADER FOLDER: Generates the '[uploader]' folder for each uploaders like YouTube channels.
-・PLAYLIST FOLDER: Generates the 'Playlist' and '[Playlist title]' folders.
+>OUTPUT
 
-    FORMAT
-    Selects the format of the files to download. The first option is for downloading only the audio, while the second includes the video as well.
+Select the working folder. Subfolders will be generated around that folder.
 
-|AUDIO|###############################################################
-(Options available when downloading audio only)
+>FOLDER
 
-    META
-    Enables/disables embedding metadata when downloading audio only.
+This option allows you to select which folders to generate. If you enable all options, the folder tree will look like this (the [] parts may vary depending on the situation):
 
-    THUMBNAIL
-    Enables/disables embedding thumbnails when downloading audio only.
+[Selected Output Folder]
+	└─dl_videos
+		├─Playlist
+		│ └─[Playlist Title]
+		└─[Uploader]
 
-|OTHER|###############################################################
+You can choose whether or not to generate the following folders:
 
-    NOTIFICATION
-    Enables/disables notifications when downloads are complete. The notification has the following options:
-    ・Play button: Plays the downloaded file immediately.
-    ・Open Folder button: Opens the folder where the downloaded file is located.
-    ・Notification click: Opens the downloaded folder when downloading a playlist.
+DL FOLDER: Generates the "dl_videos" folder.
+UPLOADER FOLDER: Generates the "[Uploader]" folder.
+PLAYLIST FOLDER: Generates the "Playlist/[Playlist Title]" folder.
 
-    BACKGROUND
-    Not yet implemented. This feature allows downloads to continue in the background even if the window is closed. The process ends when the download is complete.
+>FORMAT
 
-|OTHER OPTIONS|###############################################################
+Choose the file format to download. The top format is for audio only, and the bottom format is for video and audio.
 
-    PLAYLIST
-    Downloads an entire playlist if enabled. This option should only be enabled when downloading a playlist, as otherwise an 'NA' folder will be generated inside the 'Playlist' folder and the downloaded files will be saved there.
+| AUDIO | ###############################################################
 
-    AUDIO ONLY
-    Downloads only the audio if enabled. The format can be selected using the FORMAT option.
+(The following options are only available when downloading audio only.)
 
-|OTHER INFORMATION|==============================================================================
+>META
 
-    Input box
-    Allows for pasting a URL and starting the download by pressing ENTER.
+Choose whether or not to embed metadata when downloading audio only.
 
-    DND support
-    Supports drag and drop of video.
+>THUMBNAIL
 
-    Tray icon
-    Displays a small icon in the taskbar tray. Right-clicking on it will display a menu with options.
+Choose whether or not to embed the thumbnail when downloading audio only.
 
-If you encounter any bugs or have feedback, please post on issues or discussion page.
-author is not always online on GitHub, but is on Twitter, so if you think my response is late, please contact me via Direct Message on Twiiter.
-|Twitter|
-https://twitter.com/Bkurosiko
+| OTHER | ###############################################################
 
-|MEGA|
+>NOTIFICATION
 
-    youtube-dl old ver
-    https://mega.nz/folder/pSlmgbQA#MpLR8fWfKuGUeUEmwteODg
+Choose whether or not to display a notification when the download is complete. The notification has the following functions:
 
-    youtube-dl new ver
-    https://mega.nz/folder/AfFRkJLK#BCLR8DbJeFrWuoarCFK8BA
+Play Button: Plays the downloaded file on the spot.
+Open Folder Button: Opens the folder where the downloaded file is located.
+BACKGROUND
 
-    other
-    https://mega.nz/fm/BPszyKjS
+(Not implemented yet, but under consideration.) This feature allows the download to continue in the background even if the window is closed. The process ends after the download is complete.
+
+>PLAYLIST
+
+Enables downloading entire playlists. Since the program cannot automatically detect playlists, please enable this option only when downloading playlists. Otherwise, an "NA" folder will be generated inside the "Playlist" folder, and the downloaded files will be saved in there.
+
+>AUDIO ONLY
+
+Downloads only the audio file. The format can be selected from the FORMAT option.
+
+| OTHER EXPLANATIONS | ###############################################################
+
+>INPUT BOX
+
+Paste the URL and press ENTER to start downloading.
+
+>DND SUPPORT
+
+The program supports drag and drop.
+
+>TASKBAR  TRAY ICON
+
+The program displays a small icon on the taskbar. Right-click to select various options.
 
 
-|Generated by ChatGPT|
+
+For bug reports and feedback, please visit the following GitHub page:
+
+| Github |
+
+https://github.com/kurosiko
