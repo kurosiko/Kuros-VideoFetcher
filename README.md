@@ -6,10 +6,10 @@ FFmpeg.exe and FFprobe.exe are included in the .zip file, so they do not need to
 |OPTIONS|###############################################################
 
     OUTPUT
-    Selects the working folder, where subfolders will be generated.
+    Selects the working directory, where subdirectory will be generated.
 
     FOLDER
-    Configures the folder generation settings. If all options are enabled, the folder tree will be as follows (the [] part may vary depending on the context):
+    Configures the folder generation settings. If all options are enabled, the folder structure will be as follows (the [] part may vary depending on the context):
 
 [Selected output folder]
 └─dl_videos
@@ -19,7 +19,7 @@ FFmpeg.exe and FFprobe.exe are included in the .zip file, so they do not need to
 
 The options for generating the folders are:
 ・DL FOLDER: Generates the 'dl_videos' folder.
-・UPLOADER FOLDER: Generates the '[uploader]' folder.
+・UPLOADER FOLDER: Generates the '[uploader]' folder for each uploaders like YouTube channels.
 ・PLAYLIST FOLDER: Generates the 'Playlist' and '[Playlist title]' folders.
 
     FORMAT
