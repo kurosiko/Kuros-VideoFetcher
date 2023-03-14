@@ -1,4 +1,4 @@
-# Kuros-VideoFetcher 
+#VideoFetcher 
 This is a YouTube downloader created using yt-dlp. The available options upon startup are expressed with the ">" symbol, and their details with the "・" symbol. The settings are automatically saved to config.ini.
 
 FFmpeg.exe and FFprobe.exe are included in the .zip file, so they do not need to be added to the PATH.
