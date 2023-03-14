@@ -14,7 +14,7 @@ import math
 import win11toast
 import subprocess
 import webbrowser
-#import pprint
+import pprint
 import sys
 #sys.stdout = sys.stderr = open('nul', 'w')
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
@@ -166,6 +166,7 @@ class Gui:
     self.add_checkbox(root,"AUDIO ONLY",variable=audio_only,x=0.65,y=0.9,width=0.35)
     label = tkinter.Label(root,text=f"Output:{output}",bg="#242424",fg="#f0f0f0")
     label.place(relx=0.3,rely=0,relheight=0.1,relwidth=0.7)
+    threading.Thread(target=func_config.image).start()
   def folder(self):
     f_side = tkinter.Frame(root,bg="#454545")
     f_side.place(relheight=1,relwidth=0.3)
@@ -199,6 +200,8 @@ def dl_start(event):
     textbox.delete(0,tkinter.END)
   else:
     URL = event.data
+  if not URL:
+    threading.Thread(target=win11toast.toast("ERROR","No URL entered")).start()
   #|DATA|
   info = {
       'title': None,
@@ -255,7 +258,10 @@ def dl_start(event):
     if data['status'] == "downloading":
       if not info['title'] == data['info_dict']['title']:
         info['title'] = data['info_dict']['title']
-        info['uploader'] = data['info_dict']['uploader']
+        try:
+          info['uploader'] = data['info_dict']['uploader']
+        except:
+          info['uploader'] = data['info_dict']['id']
         if not data['info_dict']['playlist'] == None:
           info['is_playlist'] = True
           info['playlist_title'] = data['info_dict']['playlist_title']
@@ -325,7 +331,7 @@ def dl_start(event):
     nonlocal info
     ydl_opts = {}
     output_dl = output
-    ydl_opts['ignoreerrors'] = True
+    ydl_opts['ignoreerrors'] = False
     if setting['dl_folder']:
       output_dl = os.path.join(output_dl,'dl_videos')
     if setting['uploader_folder']:
@@ -357,7 +363,8 @@ def dl_start(event):
     with YoutubeDL(ydl_opts) as ydl:
       try:
         data = ydl.extract_info(URL,download=True)
-        print(data)
+        with open("Log.txt","w",encoding='utf-8') as f:
+          pprint.pprint(data,stream=f)
         #|You've already downloaded|
         info['path'] = ydl.prepare_filename(data)
         if setting['audio_only'] and setting['audio_codec'] == "auto":
@@ -385,7 +392,7 @@ def dl_start(event):
         win11toast.toast(
           "ERROR","This URL is not able to download.",
           button={'activationType': 'protocol', 'arguments': URL, 'content': 'Open Source'}
-          )
+        )
   threading.Thread(target=dl,args=(URL,)).start()
 func_config = Config()
 func_gui = Gui()
@@ -410,6 +417,7 @@ root.geometry("600x480")
 root.minsize(600,480)
 root.title("youtube-dl")
 root.configure(bg="#242424")
+root.attributes('-topmost',True)
 output = config_data["path"]["main"]
 #|READ DATA|
 try:
@@ -433,9 +441,7 @@ textbox.place(relx=0.325,rely=0.1,relheight=0.1,relwidth=0.65)
 root.dnd_bind("<<Drop>>",dl_start)
 def lunch():
   func_gui.lunch()
-  root.lift()
-  threading.Thread(target=func_config.image()).start()
-root.after(0,lunch)
+lunch()
 log = tkinter.Frame(root,bg="#242424")
 log.place(relx=0.325,rely=0.225,relheight=0.65,relwidth=0.65)
 root.mainloop()
