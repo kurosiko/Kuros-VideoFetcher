@@ -1,5 +1,7 @@
 
-<img width="302" alt="スクリーンショット 2023-03-14 230005" src="https://user-images.githubusercontent.com/101198724/225027025-5fd51772-72ee-4846-99a9-1e420fd3b8d8.png">
+
+<img width="303" alt="スクリーンショット 2023-03-17 214511" src="https://user-images.githubusercontent.com/101198724/225908683-5d356c6a-2b40-464c-94bd-99f6e4b2e2d8.png">
+
 <br>
 | VideoFetcher |
 
@@ -12,6 +14,8 @@ Note that FFmpeg.exe and FFprobe.exe are used. You do not need to set environmen
 Automatic updates are not available.
 
 | OPTIONS | ###############################################################
+
+[General]
 
 >OUTPUT
 
@@ -37,6 +41,14 @@ PLAYLIST FOLDER: Generates the "Playlist/[Playlist Title]" folder.
 
 Choose the file format to download. The top format is for audio only, and the bottom format is for video and audio.
 
+
+>NOTIFICATION
+
+Choose whether or not to display a notification when the download is complete. The notification has the following functions:
+
+Play Button: Plays the downloaded file on the spot.
+Open Folder Button: Opens the folder where the downloaded file is located.
+
 | AUDIO | ###############################################################
 
 (The following options are only available when downloading audio only.)
@@ -50,16 +62,6 @@ Choose whether or not to embed metadata when downloading audio only.
 Choose whether or not to embed the thumbnail when downloading audio only.
 
 | OTHER | ###############################################################
-
->NOTIFICATION
-
-Choose whether or not to display a notification when the download is complete. The notification has the following functions:
-
-Play Button: Plays the downloaded file on the spot.
-Open Folder Button: Opens the folder where the downloaded file is located.
-BACKGROUND
-
-(Not implemented yet, but under consideration.) This feature allows the download to continue in the background even if the window is closed. The process ends after the download is complete.
 
 >PLAYLIST
 
