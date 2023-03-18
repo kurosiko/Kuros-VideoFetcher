@@ -1,5 +1,5 @@
 import tkinter
-from tkinter import ttk,filedialog,messagebox
+from tkinter import filedialog,messagebox
 import ctypes
 import customtkinter
 import os
@@ -15,15 +15,18 @@ import win11toast
 import math
 import tkinterdnd2
 from yt_dlp import YoutubeDL
-import pprint
 import sys
+import pprint
+
 sys.stdout = sys.stderr = open('nul', 'w')
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
 config = configparser.ConfigParser()
+
 class Config:
     def error(self):
         messagebox.showerror("KeyError","delete config file and restart again!")
         exit()
+
     def load(self):
         if not os.path.exists("./config.ini"):
             self.reset()
@@ -39,6 +42,7 @@ class Config:
                 else:
                     data[section][option] = config.get(section,option)
         return data
+    
     def save(self,event=None,exit_=False,reset=False):
         global config_data,meta,thumbnail,notification,dl_folder,uploader_folder,playlist_folder
         if not reset:
@@ -72,6 +76,7 @@ class Config:
             root.destroy()
             icon.stop()
             exit()
+
     def reset(self):
         global config_data
         config_data = {
@@ -95,6 +100,7 @@ class Config:
             },
             }
         self.save(reset=True)
+
     def image(self):
         def run():
             global win_icon,icon
@@ -125,12 +131,13 @@ class Gui:
                                         fg_color=fg_color,hover_color=("gray70", "gray30"),
                                         anchor=anchor)
         button.place(relx=x, rely=y, relheight=height, relwidth=width)
-        
+
     def add_checkbox(self, text, master=None, x=0, y=0, height=0.1, width=1,val=None,text_color="black"):
         if master == None:
             master=self.current_frame        
         checkbox = customtkinter.CTkSwitch(master=master,text=text,command=func_config.save,fg_color="red",progress_color="green",text_color=text_color,variable=val)
         checkbox.place(relx=x, rely=y, relheight=height, relwidth=width)
+
     def create_setting_frame(self, title):
         f_root = customtkinter.CTkFrame(root,corner_radius=0,fg_color="white")
         f_root.place(relx=0.3, rely=0, relheight=1, relwidth=0.7)
@@ -201,6 +208,7 @@ class Gui:
 def dl_start(event):
     if textbox.get():
         URL = textbox.get()
+        textbox.delete(0,tkinter.END)
     else:
         URL = event.data
     info = {}
@@ -277,14 +285,32 @@ def dl_start(event):
         elif data['status'] == 'finished':
             l_title.configure(text='Exporting :D')
 
-    def destory():
+    def destory(is_error=False):
         frame.destroy()
-        if setting['notification']:
+
+        if setting['notification'] or is_error:
+            def error():
+                nonlocal notification_opts
+                notification_opts.update({
+                    "title":'ERROR',
+                    "body":URL,
+                    "button":{'activationType': 'protocol', 'arguments':URL, 'content': 'Open URL'}
+                    }
+                )
             notification_opts = {}
             notification_opts['app_id'] = 'VideoFetcher'
             notification_opts['duration'] = 'short'
-
-            if info['is_playlist']:
+            try:
+                PIL.Image.open(io.BytesIO(requests.get(info['thumbnail'],timeout=(10,10)).content)).save('thumbnail.png')
+                notification_opts['image'] = {
+                    'src': os.path.join(os.getcwd(),"thumbnail.png"),
+                    'placement': 'hero'
+                }
+            except:
+                pass
+            if is_error:
+                error()
+            elif info['is_playlist']:
                 notification_opts.update({
                     'title':info['title'],
                     'body':'Finish download playlist!',
@@ -300,13 +326,8 @@ def dl_start(event):
                     ]
                 })
             else:
-                notification_opts.update({
-                    "title":"ERROR",
-                    "body":"It's error :(",
-                    "button":{'activationType': 'protocol', 'arguments': URL, 'content': 'Open Source'}
-                })
+                error()
             threading.Thread(target=win11toast.toast, kwargs=notification_opts).start()
-
     def dl(URL,setting=setting):
         nonlocal info
         output_dl = output
@@ -342,27 +363,32 @@ def dl_start(event):
             if setting['resolution'] == 'Auto':
                 ydl_opts['format'] = "bv+ba[ext=m4a]/bv+ba/b"
             else:
-                ydl_opts['format'] = f'bv[height<={setting["resolution_dict"][{setting["resolution"]}]}]+ba[ext=m4a]/bv+ba/b'
+                ydl_opts['format'] = f"bv[height={str(setting['resolution']).replace('p','')}]+ba[ext=m4a]/bv+ba[ext=m4a]/b"
             ydl_opts['merge_output_format'] = setting['video_codec']
 
         ydl_opts['progress_hooks'] = [hook]
-
-        with YoutubeDL(ydl_opts) as ydl:
-            data = ydl.extract_info(URL,download=True)
-        info['path'] = ydl.prepare_filename(data)
-        info['title'] = data['title']
-        info['uploader'] = data['uploader']
-
-        if '_type' in data and data['_type'] == 'playlist':
-            info['is_playlist'] = True
-            info['path'] = data['entries'][0]['requested_downloads'][0]['__finaldir']
-        else:
-            info['is_playlist'] = False
-        if setting['audio_only'] and not setting['audio_codec'] == 'Auto':
-            info['path'] = f"{os.path.splitext(info['path'])[0]}.{setting['audio_ext'][setting['audio_codec']]}"
+        try:
+            with YoutubeDL(ydl_opts) as ydl:
+                try:
+                    data = ydl.extract_info(URL,download=True)
+                except:
+                    return destory(is_error=True)
+                info['path'] = ydl.prepare_filename(data)
+            info['title'] = data['title']
+            info['uploader'] = data['uploader']
+            if '_type' in data and data['_type'] == 'playlist':
+                info['is_playlist'] = True
+                info['thumbnail'] = data['entries'][0]['thumbnail']
+                info['path'] = data['entries'][0]['requested_downloads'][0]['__finaldir']
+            else:
+                info['is_playlist'] = False
+                info['thumbnail'] = data['thumbnail']
+            if setting['audio_only'] and not setting['audio_codec'] == 'Auto':
+                info['path'] = f"{os.path.splitext(info['path'])[0]}.{setting['audio_ext'][setting['audio_codec']]}"
+        except:
+            return destory(is_error=True)    
         return destory()
     threading.Thread(target=dl,args=(URL,)).start()
-
 
 func_config = Config()
 config_data = func_config.load()
@@ -403,13 +429,16 @@ root.dnd_bind('<<Drop>>',dl_start)
 textbox = customtkinter.CTkEntry(root,placeholder_text="Enter URL")
 textbox.place(relx=0.35,rely=0.05,relwidth=0.6)
 textbox.bind("<Return>",dl_start)
+
 playlist = tkinter.BooleanVar(value=False)
 audio_only  = tkinter.BooleanVar(value=False)
+
 f_log = customtkinter.CTkFrame(root,corner_radius=5)
 f_log.place(relx=0.35,rely=0.2,relwidth=0.6,relheight=0.75)
 
-
 func_gui = Gui()
 func_gui.lunch()
+
+root.update()
 
 root.mainloop()
