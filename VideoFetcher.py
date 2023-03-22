@@ -16,13 +16,17 @@ import math
 import tkinterdnd2
 from yt_dlp import YoutubeDL
 import sys
-import pprint
+#import pprint
+
+customtkinter.set_appearance_mode("Dark")
 
 sys.stdout = sys.stderr = open('nul', 'w')
+
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
 config = configparser.ConfigParser()
 
 class Config:
+
     def error(self):
         messagebox.showerror("KeyError","delete config file and restart again!")
         exit()
@@ -30,7 +34,7 @@ class Config:
     def load(self):
         if not os.path.exists("./config.ini"):
             self.reset()
-            with open("config.ini","w") as ini_file:
+            with open("config.ini","w",encoding='utf-8') as ini_file:
                 config.write(ini_file)
         config.read("config.ini",encoding='utf-8')
         data = {}
@@ -70,7 +74,7 @@ class Config:
             config[section] = {}
             for option,value in dict(options).items():
                 config[section][option] = str(value)
-        with open('config.ini',"w") as ini_file:
+        with open('config.ini',"w",encoding='utf-8') as ini_file:
                 config.write(ini_file)
         if exit_:
             root.destroy()
@@ -109,7 +113,7 @@ class Config:
             menu = pystray.Menu(
                 pystray.MenuItem(
                 "Info",
-                lambda:messagebox.showinfo("Info","""This softwere was made by kurosiko.\nIf you find any bugs or have suggestions for feature improvements, please contact us on Twitter!\nhttps://github.com/kurosiko""")
+                "v1.2"
                 ),
                 pystray.MenuItem(
                 "Jump To Homepage",
@@ -118,11 +122,16 @@ class Config:
             )
             icon = pystray.Icon("Neural",icon=win_icon,menu=menu,title="VideoFetcher is running!")
             icon.run()
-            self.save(exit_=True)
         threading.Thread(target=run,daemon=True).start()
+
 class Gui:
+
     def __init__(self):
         self.current_frame = None
+
+    def open_browser(self,URL):
+        webbrowser.open(url=URL)
+
     def add_button(self, text=None, master=None, cmd=None, x=0, y=0, height=0.1, width=1,corner_radius=0,fg_color="transparent",anchor=tkinter.N):
         if master == None:
             master = self.current_frame
@@ -138,12 +147,16 @@ class Gui:
         checkbox = customtkinter.CTkSwitch(master=master,text=text,command=func_config.save,fg_color="red",progress_color="green",text_color=text_color,variable=val)
         checkbox.place(relx=x, rely=y, relheight=height, relwidth=width)
 
+    def add_weblink(self,text,x=0,y=0,height=0.1,width=1,cmd=None):
+        button  = customtkinter.CTkButton(master=self.current_frame,text=text,command=cmd,text_color="#47bcf2",fg_color="transparent",corner_radius=0,hover_color="#dee6ff")
+        button.place(relx=x,rely=y,relheight=height,relwidth=width)
+        
     def create_setting_frame(self, title):
         f_root = customtkinter.CTkFrame(root,corner_radius=0,fg_color="white")
         f_root.place(relx=0.3, rely=0, relheight=1, relwidth=0.7)
         customtkinter.CTkLabel(f_root, text=title, fg_color="#444444", text_color="white").place(relx=0, rely=0, relheight=0.1, relwidth=1)
         return f_root
-
+    
     def general(self):
         if self.current_frame is not None:
             self.current_frame.destroy()
@@ -169,7 +182,6 @@ class Gui:
         if self.current_frame is not None:
             self.current_frame.destroy()
         self.current_frame = self.create_setting_frame("VIDEO")
-
         video_codec_list = ["mp4","mkv","webm"]
         video_resolution = ["Auto","144p","240p","360p","480p","720p","1080p"]
 
@@ -192,6 +204,20 @@ class Gui:
         self.add_checkbox(text="Thumbnail",x=0.05,y=0.45,val=thumbnail)
         self.add_button(text="Close",cmd=lambda:self.current_frame.destroy(),y=0.9,fg_color="#444444")
 
+    def other(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+        self.current_frame = self.create_setting_frame("OTHER")
+
+        self.add_weblink(text="WebPage",y=0.1,cmd=lambda:self.open_browser(URL="https://kurosiko.github.io/"))
+        self.add_weblink(text="FFmpeg",y=0.2,cmd=lambda:self.open_browser(URL="https://ffmpeg.org"))
+        self.add_weblink(text="Github",y=0.3,cmd=lambda:self.open_browser(URL="https://github.com/kurosiko/Kuros-VideoFetcher"))
+        self.add_weblink(text="Twitter",y=0.4,cmd=lambda:self.open_browser(URL="https://twitter.com/kurosiko"))
+        self.add_weblink(text="YouTube",y=0.5,cmd=lambda:self.open_browser(URL="https://www.youtube.com/channel/UCkbPdwURHuIG63f5ZTj3fjw"))
+        self.add_button(text="Close",cmd=lambda:self.current_frame.destroy(),y=0.9,fg_color="#444444")
+
+
+    
     def lunch(self):
         f_side = customtkinter.CTkFrame(root,corner_radius=0)
         f_side.place(relx=0, rely=0, relheight=1, relwidth=0.3)
@@ -200,6 +226,7 @@ class Gui:
         self.add_button(master=f_side,text= "GENERAL", y=0.1, cmd=self.general,anchor=tkinter.E)
         self.add_button(master=f_side,text= "VIDEO", y=0.2, cmd=self.video,anchor=tkinter.E)
         self.add_button(master=f_side,text= "AUDIO", y=0.3, cmd=self.audio,anchor=tkinter.E)
+        self.add_button(master=f_side,text= "OTHER",y=0.4, cmd=self.other,anchor=tkinter.E)
 
         func_gui.add_checkbox(master=f_side,text="Playlist",x=0.05,y=0.7,val=playlist,text_color="white")
         func_gui.add_checkbox(master=f_side,text="Audio Only",x=0.05,y=0.8,val=audio_only,text_color="white")
@@ -338,14 +365,14 @@ def dl_start(event):
             output_dl = os.path.join(output_dl,'dl_videos')
         if setting['uploader_folder']:
             output_dl = os.path.join(output_dl,'%(uploader)s')
-            output_dl = os.path.join(output_dl,'%(title)s.%(ext)s')
         if not setting['playlist']:
             ydl_opts['noplaylist'] = True
         elif setting['playlist_folder'] and setting['dl_folder']:
-            output_dl = os.path.join(output,'dl_videos','Playlist','%(playlist)s','%(title)s.%(ext)s')
+            output_dl = os.path.join(output,'dl_videos','Playlist','%(playlist)s')
         elif setting['playlist_folder'] and not setting['dl_folder']:
-            output_dl = os.path.join(output,'Playlist','%(playlist)s','%(title)s.%(ext)s')
-        ydl_opts['outtmpl'] = output_dl
+            output_dl = os.path.join(output,'Playlist','%(playlist)s')
+
+        ydl_opts['outtmpl'] = os.path.join(output_dl,'%(title)s.%(ext)s')
 
         if setting['audio_only']:
             ydl_opts['format'] = "bestaudio"
@@ -364,7 +391,8 @@ def dl_start(event):
                 ydl_opts['format'] = "bv+ba[ext=m4a]/bv+ba/b"
             else:
                 ydl_opts['format'] = f"bv[height={str(setting['resolution']).replace('p','')}]+ba[ext=m4a]/bv+ba[ext=m4a]/b"
-            ydl_opts['merge_output_format'] = setting['video_codec']
+            if setting['video_codec'] != "webm":
+                ydl_opts['merge_output_format'] = setting['video_codec']
 
         ydl_opts['progress_hooks'] = [hook]
         try:
@@ -373,6 +401,8 @@ def dl_start(event):
                     data = ydl.extract_info(URL,download=True)
                 except:
                     return destory(is_error=True)
+                else:
+                    print("\033[32m"+"DL"+"\033[0m")
                 info['path'] = ydl.prepare_filename(data)
             info['title'] = data['title']
             info['uploader'] = data['uploader']
@@ -384,9 +414,11 @@ def dl_start(event):
                 info['is_playlist'] = False
                 info['thumbnail'] = data['thumbnail']
             if setting['audio_only'] and not setting['audio_codec'] == 'Auto':
-                info['path'] = f"{os.path.splitext(info['path'])[0]}.{setting['audio_ext'][setting['audio_codec']]}"
+                info['path'] = f"{os.path.splitext(info['path'])[0]}.{setting['audio_ext'][setting['audio_codec']]}"                
         except:
-            return destory(is_error=True)    
+            return destory(is_error=True)
+        else:
+            print("\033[32m"+"Get Info"+"\033[0m")
         return destory()
     threading.Thread(target=dl,args=(URL,)).start()
 
@@ -439,6 +471,6 @@ f_log.place(relx=0.35,rely=0.2,relwidth=0.6,relheight=0.75)
 func_gui = Gui()
 func_gui.lunch()
 
+root.protocol("WM_DELETE_WINDOW",lambda:func_config.save(exit_=True))
 root.update()
-
 root.mainloop()
