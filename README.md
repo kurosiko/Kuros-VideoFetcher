@@ -25,15 +25,17 @@ Select the working folder. Subfolders will be generated around that folder.
 
 >FOLDER
 
-This option allows you to select which folders to generate. If you enable all options, the folder tree will look like this (the [] parts may vary depending on the situation)
+This option allows you to select which folders to generate.
+You can specify whether to generate the following floors
 
-[Selected Output Folder]
-	└─dl_videos<br>
-		├─Playlist<br>
-		│ └─[Playlist Title]<br>
-		└─[Uploader]
+You can choose whether or not to generate the following folders
 
-You can choose whether or not to generate the following folders:
+[selected folder]<br>
+	&emsp;└─dl_videos<br>
+	&emsp;&emsp;&emsp;&emsp;├─[uploader name]<br>
+	&emsp;&emsp;&emsp;&emsp;└─Playlist<br>
+	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;└─[playlist title]<br>
+
 
 DL FOLDER: Generates the "dl_videos" folder.
 UPLOADER FOLDER: Generates the "[Uploader]" folder.
@@ -42,6 +44,12 @@ PLAYLIST FOLDER: Generates the "Playlist/[Playlist Title]" folder.
 >FORMAT
 
 Choose the file format to download. The top format is for audio only, and the bottom format is for video and audio.
+
+Support Fomat:
+
+Video:mp4, mkv,webm
+
+Audio:acc,flac,mp3,m4a,opus,vorbis,wav,webm
 
 
 >NOTIFICATION
