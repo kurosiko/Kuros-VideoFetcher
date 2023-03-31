@@ -9,7 +9,9 @@ This is a YouTube downloader created using yt-dlp (Python).
 
 Settings are automatically saved in config.ini.
 
-Note that FFmpeg.exe and FFprobe.exe are used. You do not need to set environment variables, but it is recommended that you place them in the same location as the downloader.
+| Note |
+
+that FFmpeg.exe and FFprobe.exe are used. You do not need to set environment variables, but it is recommended that you place them in the same location as the downloader.
 
 Automatic updates are not available.
 
@@ -23,12 +25,12 @@ Select the working folder. Subfolders will be generated around that folder.
 
 >FOLDER
 
-This option allows you to select which folders to generate. If you enable all options, the folder tree will look like this (the [] parts may vary depending on the situation):
+This option allows you to select which folders to generate. If you enable all options, the folder tree will look like this (the [] parts may vary depending on the situation)
 
 [Selected Output Folder]
-	└─dl_videos
-		├─Playlist
-		│ └─[Playlist Title]
+	└─dl_videos<br>
+		├─Playlist<br>
+		│ └─[Playlist Title]<br>
 		└─[Uploader]
 
 You can choose whether or not to generate the following folders:
