@@ -9,6 +9,8 @@ This is a YouTube downloader created using yt-dlp (Python).
 
 Settings are automatically saved in config.ini.
 
+!!! If this software fails to start, delete config.ini and start again. !!!
+
 | Note |
 
 that FFmpeg.exe and FFprobe.exe are used. You do not need to set environment variables, but it is recommended that you place them in the same location as the downloader.
