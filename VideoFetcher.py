@@ -16,7 +16,7 @@ import math
 import tkinterdnd2
 from yt_dlp import YoutubeDL
 import sys
-#import pprint
+import pprint
 
 customtkinter.set_appearance_mode("Dark")
 
@@ -41,10 +41,13 @@ class Config:
         for section in config.sections():
             data[section] = {}
             for option in config.options(section):
-                if section in "dl_options":
-                    data[section][option] = config.getboolean(section,option) 
+                if any(x in section for x in ["dl_options","app_options"]):
+                    data[section][option] = config.getboolean(section,option)
+                elif section in "dl_channel":
+                    data[section][option] = eval(config.get(section,option))
                 else:
                     data[section][option] = config.get(section,option)
+        pprint.pprint(data)
         return data
     
     def save(self,event=None,exit_=False,reset=False):
@@ -64,10 +67,19 @@ class Config:
                 "uploader_folder":uploader_folder.get(),
                 "playlist_folder":playlist_folder.get(),
                 },
+                "app_options":
+                {
+                "dl_latest":dl_latest,
+                "exit":dl_latest_exit
+                },
                 "codec":
                 {"audio_codec":audio_codec.get(),
                 "video_codec":video_codec.get(),
                 "resolution":resolution.get()
+                },
+                "dl_channel":
+                {
+                "URL":dl_channel
                 }
             }
         for section,options in dict(config_data).items():
@@ -77,8 +89,8 @@ class Config:
         with open('config.ini',"w",encoding='utf-8') as ini_file:
                 config.write(ini_file)
         if exit_:
-            root.destroy()
             icon.stop()
+            root.destroy()
             exit()
 
     def reset(self):
@@ -97,11 +109,20 @@ class Config:
             "uploader_folder":True,
             "playlist_folder":True,
             },
+            "app_options":
+            {
+            "dl_latest":False,
+            "exit":True
+            },
             "codec":
             {"audio_codec":"Auto",
             "video_codec":"mp4",
             "resolution":"Auto"
             },
+            "dl_channel":
+            {
+            "URL":'["chanel URL 1","chanel URL 2"]'
+            }
             }
         self.save(reset=True)
 
@@ -113,7 +134,7 @@ class Config:
             menu = pystray.Menu(
                 pystray.MenuItem(
                 "Info",
-                "v1.2"
+                "v1.3"
                 ),
                 pystray.MenuItem(
                 "Jump To Homepage",
@@ -168,6 +189,7 @@ class Gui:
             if output_sub:
                 output = output_sub
                 Path_Label.configure(text=output)
+                
         Path_Label = customtkinter.CTkLabel(self.current_frame,text=output,text_color="black",anchor=tkinter.W)
         Path_Label.place(relx=0.05, rely=0.15, relheight=0.1, relwidth=0.65)
         self.add_button(text="Browse",cmd=browse,
@@ -228,16 +250,17 @@ class Gui:
         self.add_button(master=f_side,text= "AUDIO", y=0.3, cmd=self.audio,anchor=tkinter.E)
         self.add_button(master=f_side,text= "OTHER",y=0.4, cmd=self.other,anchor=tkinter.E)
 
-        func_gui.add_checkbox(master=f_side,text="Playlist",x=0.05,y=0.7,val=playlist,text_color="white")
-        func_gui.add_checkbox(master=f_side,text="Audio Only",x=0.05,y=0.8,val=audio_only,text_color="white")
+        self.add_checkbox(master=f_side,text="Playlist",x=0.05,y=0.7,val=playlist,text_color="white")
+        self.add_checkbox(master=f_side,text="Audio Only",x=0.05,y=0.8,val=audio_only,text_color="white")
         threading.Thread(target=func_config.image).start()
 
-def dl_start(event):
-    if textbox.get():
-        URL = textbox.get()
-        textbox.delete(0,tkinter.END)
-    else:
-        URL = event.data
+def dl_start(event=None,skip=False,URL=None):
+    if not skip:
+        if textbox.get():
+            URL = textbox.get()
+            textbox.delete(0,tkinter.END)
+        else:
+            URL = event.data
     info = {}
     setting = {
         'meta': meta.get(),
@@ -262,6 +285,8 @@ def dl_start(event):
         }
     }
 
+    cancel = False
+    
     progress = 0
     frame = customtkinter.CTkFrame(f_log,fg_color="black",height=50,corner_radius=0)
 
@@ -283,6 +308,8 @@ def dl_start(event):
     frame.pack(fill=tkinter.X)
 
     def hook(data,URL=URL):
+        if cancel:
+            return lambda:print("CANCEL")
         nonlocal info,progress
         if data['status'] == 'downloading':
             info['title'] = data['info_dict']['title']
@@ -312,15 +339,17 @@ def dl_start(event):
         elif data['status'] == 'finished':
             l_title.configure(text='Exporting :D')
 
-    def destory(is_error=False):
-        frame.destroy()
-
+    def destory(is_error=False,URL=URL):
+        try:
+            frame.destroy()
+        except:
+            pass
         if setting['notification'] or is_error:
             def error():
                 nonlocal notification_opts
                 notification_opts.update({
                     "title":'ERROR',
-                    "body":URL,
+                    "body": URL,
                     "button":{'activationType': 'protocol', 'arguments':URL, 'content': 'Open URL'}
                     }
                 )
@@ -355,6 +384,7 @@ def dl_start(event):
             else:
                 error()
             threading.Thread(target=win11toast.toast, kwargs=notification_opts).start()
+
     def dl(URL,setting=setting):
         nonlocal info
         output_dl = output
@@ -422,8 +452,20 @@ def dl_start(event):
         return destory()
     threading.Thread(target=dl,args=(URL,)).start()
 
+
+def dl_sub():
+    if dl_latest:
+        for url in dl_channel:
+            dl_start(URL=url,skip=True)
+    """
+    if dl_latest_exit:
+        exit()
+    """
+
 func_config = Config()
 config_data = func_config.load()
+func_gui = Gui()
+
 root = tkinterdnd2.Tk()
 root.drop_target_register(tkinterdnd2.DND_TEXT)
 def titlebar(window):#By Unnamedbuthere_
@@ -437,8 +479,12 @@ def titlebar(window):#By Unnamedbuthere_
   value = ctypes.c_int(value)
   set_window_attribute(hwnd,rendering_policy,ctypes.byref(value),ctypes.sizeof(value))
 titlebar(root)
-output = config_data["path"]["main"]
+
 try:
+    output = config_data["path"]["main"]
+    dl_latest = config_data["app_options"]["dl_latest"]
+    dl_latest_exit = config_data["app_options"]["exit"]
+    dl_channel = config_data["dl_channel"]["url"]
     meta = tkinter.BooleanVar(value=config_data["dl_options"]["meta"])
     thumbnail = tkinter.BooleanVar(value=config_data["dl_options"]["thumbnail"])
     notification = tkinter.BooleanVar(value=config_data["dl_options"]["notification"])
@@ -468,8 +514,9 @@ audio_only  = tkinter.BooleanVar(value=False)
 f_log = customtkinter.CTkFrame(root,corner_radius=5)
 f_log.place(relx=0.35,rely=0.2,relwidth=0.6,relheight=0.75)
 
-func_gui = Gui()
 func_gui.lunch()
+
+root.after(1000,lambda:threading.Thread(target=dl_sub).start())
 
 root.protocol("WM_DELETE_WINDOW",lambda:func_config.save(exit_=True))
 root.update()
