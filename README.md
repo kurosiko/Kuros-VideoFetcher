@@ -85,19 +85,23 @@ Downloads only the audio file. The format can be selected from the FORMAT option
 
 | OTHER EXPLANATIONS | ###############################################################
 
->INPUT BOX
+>Input Box
 
 Paste the URL and press ENTER to start downloading.
 
->DND SUPPORT
+>DND Support
 
 The program supports drag and drop.
 
->TASKBAR  TRAY ICON
+>Task Bar Tray Icon
 
 The program displays a small icon on the taskbar. Right-click to select various options.
 
+> Auto Download
 
+Open config.ini and rewrite dl_latest to True, dl_channel url
+Enter the channel url in . At that time, please delete the original "Channel URL 1" and "Channel URL 2". That's an example input.
+Don't remove the brackets
 
 For bug reports and feedback, please visit the following GitHub page:
 
