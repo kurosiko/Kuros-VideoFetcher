@@ -17,7 +17,7 @@ that FFmpeg.exe and FFprobe.exe are used. You do not need to set environment var
 
 Automatic updates are not available.
 
-| OPTIONS |
+| OPTIONS | ###############################################################
 
 [General]
 
@@ -98,7 +98,7 @@ The program supports drag and drop.
 The program displays a small icon on the taskbar. Right-click to select various options.
 
 > Auto Download
-
+!!It is necessary to use the windows task scheduler etc. for complete automation!!
 Open config.ini and rewrite dl_latest to True, dl_channel url.
 If exit  = True,Automatically close the app when the automatic download is finished.
 Enter the channel url in . At that time, please delete the original "Channel URL 1" and "Channel URL 2". That's an example input.
