@@ -97,7 +97,8 @@ The program supports drag and drop.
 
 The program displays a small icon on the taskbar. Right-click to select various options.
 
-> Auto Download
+>Auto Download
+
 !!It is necessary to use the windows task scheduler etc. for complete automation!!
 Open config.ini and rewrite dl_latest to True, dl_channel url.
 If exit  = True,Automatically close the app when the automatic download is finished.
