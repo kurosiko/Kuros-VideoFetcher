@@ -17,10 +17,29 @@ import tkinterdnd2
 from yt_dlp import YoutubeDL
 import sys
 import pprint
+from ffmpeg_downloader import __main__ as ffdl
 
+def ffmpeg(upgrade=False):
+    class arg:
+        def __init__(self,upgrade):
+            self.upgrade = upgrade
+        proxy = None
+        retries = 5
+        timeout = 15
+        no_cache_dir = False
+        force = False
+        y = True
+        add_path = True
+        no_simlinks = False
+        set_env = None
+        reset_env = False
+        presets = None
+        version = "snapshot@full"
+        func = ffdl.install
+    pprint.pprint(arg.__dict__)
+    ffdl.install(arg(upgrade))
+ffmpeg(upgrade=True)
 customtkinter.set_appearance_mode("Dark")
-
-sys.stdout = sys.stderr = open('nul', 'w')
 
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
 config = configparser.ConfigParser()
@@ -32,11 +51,11 @@ class Config:
         exit()
 
     def load(self):
-        if not os.path.exists("./config.ini"):
+        if not os.path.exists("./vf.config"):
             self.reset()
-            with open("config.ini","w",encoding='utf-8') as ini_file:
+            with open("vf.config","w",encoding='utf-8') as ini_file:
                 config.write(ini_file)
-        config.read("config.ini",encoding='utf-8')
+        config.read("vf.config",encoding='utf-8')
         data = {}
         for section in config.sections():
             data[section] = {}
@@ -69,8 +88,6 @@ class Config:
                 },
                 "app_options":
                 {
-                "dl_latest":dl_latest,
-                "exit":dl_latest_exit
                 },
                 "codec":
                 {"audio_codec":audio_codec.get(),
@@ -86,7 +103,7 @@ class Config:
             config[section] = {}
             for option,value in dict(options).items():
                 config[section][option] = str(value)
-        with open('config.ini',"w",encoding='utf-8') as ini_file:
+        with open('vf.config',"w",encoding='utf-8') as ini_file:
                 config.write(ini_file)
         if exit_:
             icon.stop()
@@ -111,8 +128,6 @@ class Config:
             },
             "app_options":
             {
-            "dl_latest":False,
-            "exit":True
             },
             "codec":
             {"audio_codec":"Auto",
@@ -143,7 +158,7 @@ class Config:
             )
             icon = pystray.Icon("Neural",icon=win_icon,menu=menu,title="VideoFetcher is running!")
             icon.run()
-        threading.Thread(target=run,daemon=True).start()
+        threading.Thread(target=run).start()
 
 class Gui:
 
@@ -238,8 +253,11 @@ class Gui:
         self.add_weblink(text="YouTube",y=0.5,cmd=lambda:self.open_browser(URL="https://www.youtube.com/channel/UCkbPdwURHuIG63f5ZTj3fjw"))
         self.add_button(text="Close",cmd=lambda:self.current_frame.destroy(),y=0.9,fg_color="#444444")
 
+    def log(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+        sys.stdout.deiconify()
 
-    
     def lunch(self):
         f_side = customtkinter.CTkFrame(root,corner_radius=0)
         f_side.place(relx=0, rely=0, relheight=1, relwidth=0.3)
@@ -249,6 +267,7 @@ class Gui:
         self.add_button(master=f_side,text= "VIDEO", y=0.2, cmd=self.video,anchor=tkinter.E)
         self.add_button(master=f_side,text= "AUDIO", y=0.3, cmd=self.audio,anchor=tkinter.E)
         self.add_button(master=f_side,text= "OTHER",y=0.4, cmd=self.other,anchor=tkinter.E)
+        self.add_button(master=f_side,text= "LOG",y=0.5,cmd=self.log,anchor=tkinter.E)
 
         self.add_checkbox(master=f_side,text="Playlist",x=0.05,y=0.7,val=playlist,text_color="white")
         self.add_checkbox(master=f_side,text="Audio Only",x=0.05,y=0.8,val=audio_only,text_color="white")
@@ -256,11 +275,8 @@ class Gui:
 
 def dl_start(event=None,skip=False,URL=None):
     if not skip:
-        if textbox.get():
-            URL = textbox.get()
-            textbox.delete(0,tkinter.END)
-        else:
-            URL = event.data
+        URL = textbox.get() or event.data
+        textbox.delete(0,tkinter.END)
     info = {}
     setting = {
         'meta': meta.get(),
@@ -317,7 +333,7 @@ def dl_start(event=None,skip=False,URL=None):
                 info['uploader'] = data['info_dict']['uploader']
             except:
                 info['uploader'] = data['info_dict']['id']
-            if not data['info_dict']['playlist'] == None:
+            if data['info_dict']['playlist'] is not None:
                 info['is_playlist'] = True
                 info['playlist_title'] = data['info_dict']['playlist_title']
                 info['playlist_count'] = data['info_dict']['playlist_count']
@@ -365,7 +381,7 @@ def dl_start(event=None,skip=False,URL=None):
             except:
                 pass
             if is_error:
-                error()
+                return error()
             elif info['is_playlist']:
                 notification_opts.update({
                     'title':info['title'],
@@ -382,7 +398,7 @@ def dl_start(event=None,skip=False,URL=None):
                     ]
                 })
             else:
-                error()
+                return error()
             threading.Thread(target=win11toast.toast, kwargs=notification_opts).start()
 
     def dl(URL,setting=setting):
@@ -444,23 +460,35 @@ def dl_start(event=None,skip=False,URL=None):
                 info['is_playlist'] = False
                 info['thumbnail'] = data['thumbnail']
             if setting['audio_only'] and not setting['audio_codec'] == 'Auto':
-                info['path'] = f"{os.path.splitext(info['path'])[0]}.{setting['audio_ext'][setting['audio_codec']]}"                
+                info['path'] = f"{os.path.splitext(info['path'])[0]}.{setting['audio_ext'][setting['audio_codec']]}"
         except:
             return destory(is_error=True)
         else:
-            print("\033[32m"+"Get Info"+"\033[0m")
+            print("\033[32m"+"ok"+"\033[0m")
         return destory()
-    threading.Thread(target=dl,args=(URL,)).start()
+    thread = threading.Thread(target=dl,args=(URL,))
+    thread.start()
+    return thread
 
+class CustomLog(tkinter.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Log")
+        self.geometry("600x480")
+        self.configure(bg="#242424")
+        self.minsize(600, 480)
+        self.attributes('-topmost', True)
+        self.protocol()
+        self.log = tkinter.Text(self)
+        self.log.pack(fill=tkinter.BOTH)
+        self.protocol("WM_DELETE_WINDOW",lambda:self.withdraw())
 
-def dl_sub():
-    if dl_latest:
-        for url in dl_channel:
-            dl_start(URL=url,skip=True)
-    """
-    if dl_latest_exit:
-        exit()
-    """
+    def write(self, string):
+        self.log.insert(tkinter.END, f"{string}\n")
+        self.log.see(tkinter.END)
+
+    def flush(self):
+        pass
 
 func_config = Config()
 config_data = func_config.load()
@@ -482,8 +510,6 @@ titlebar(root)
 
 try:
     output = config_data["path"]["main"]
-    dl_latest = config_data["app_options"]["dl_latest"]
-    dl_latest_exit = config_data["app_options"]["exit"]
     dl_channel = config_data["dl_channel"]["url"]
     meta = tkinter.BooleanVar(value=config_data["dl_options"]["meta"])
     thumbnail = tkinter.BooleanVar(value=config_data["dl_options"]["thumbnail"])
@@ -496,6 +522,11 @@ try:
     video_codec = tkinter.StringVar(value=config_data["codec"]["video_codec"])
 except:
     func_config.error()
+
+sys.stdout = CustomLog(root)
+sys.stdout.withdraw()
+
+print("Log Strat")
 
 root.title("VideoFetcher")
 root.geometry("600x480")
@@ -515,8 +546,6 @@ f_log = customtkinter.CTkFrame(root,corner_radius=5)
 f_log.place(relx=0.35,rely=0.2,relwidth=0.6,relheight=0.75)
 
 func_gui.lunch()
-
-root.after(1000,lambda:threading.Thread(target=dl_sub).start())
 
 root.protocol("WM_DELETE_WINDOW",lambda:func_config.save(exit_=True))
 root.update()
