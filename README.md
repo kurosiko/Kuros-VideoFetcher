@@ -1,112 +1,123 @@
+# VideoFetcher v2.0
 
+A modern, sleek YouTube/video downloader with an intuitive GUI built using `customtkinter` and `yt-dlp`.
 
-<img width="303" alt="スクリーンショット 2023-03-17 214511" src="https://user-images.githubusercontent.com/101198724/225908683-5d356c6a-2b40-464c-94bd-99f6e4b2e2d8.png">
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Python](https://img.shields.io/badge/python-3.10+-green)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-<br>
-| VideoFetcher |
+## ✨ Features
 
-This is a YouTube downloader created using yt-dlp (Python).
+- 🎨 **Modern UI** - Clean, dark-themed interface with smooth animations
+- 📥 **Video & Audio Download** - Support for multiple formats and resolutions
+- 🎵 **Audio Extraction** - Convert to MP3, AAC, FLAC, and more
+- 📁 **Smart Organization** - Auto-sort by uploader, playlist, or custom folders
+- 🔔 **Notifications** - Desktop notifications when downloads complete
+- 🖱️ **Drag & Drop** - Simply drag URLs into the app
+- ⚙️ **Auto-Save Settings** - Your preferences are automatically saved
 
-Settings are automatically saved in config.ini.
+## 🚀 Quick Start
 
-!!! If this software fails to start, delete config.ini and start again. !!!
+### Installation with uv (Recommended)
 
-| Note |
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-that FFmpeg.exe and FFprobe.exe are used. You do not need to set environment variables, but it is recommended that you place them in the same location as the downloader.
+# Clone and install
+git clone <repository-url>
+cd videofetcher
+uv sync
 
-Automatic updates are not available.
+# Run the application
+uv run videofetcher
+```
 
-| OPTIONS | ###############################################################
+### Alternative: pip installation
 
-[General]
+```bash
+pip install -e .
+videofetcher
+```
 
->OUTPUT
+## 📋 Requirements
 
-Select the working folder. Subfolders will be generated around that folder.
+- Python 3.10+
+- FFmpeg (for audio conversion and merging)
 
->FOLDER
+## ⚙️ Configuration
 
-This option allows you to select which folders to generate.
-You can specify whether to generate the following floors
+Settings are automatically saved to `vf_config.ini`. If the app fails to start, delete this file and restart.
 
-You can choose whether or not to generate the following folders
+### Options
 
-[selected folder]<br>
-	&emsp;└─dl_videos<br>
-	&emsp;&emsp;&emsp;&emsp;├─[uploader name]<br>
-	&emsp;&emsp;&emsp;&emsp;└─Playlist<br>
-	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;└─[playlist title]<br>
+#### General Settings
+- **Output Path**: Choose where downloads are saved
+- **Download Folder**: Create a `dl_videos` subfolder
+- **Uploader Folder**: Organize by uploader name
+- **Playlist Folder**: Separate folder for playlists
+- **Notifications**: Enable desktop notifications
 
+#### Video Settings
+- **Format**: MP4, MKV, or WebM
+- **Resolution**: From 144p to 4K (2160p)
 
-DL FOLDER: Generates the "dl_videos" folder.
-UPLOADER FOLDER: Generates the "[Uploader]" folder.
-PLAYLIST FOLDER: Generates the "Playlist/[Playlist Title]" folder.
+#### Audio Settings
+- **Format**: Auto, AAC, FLAC, MP3, M4A, Opus, Vorbis, WAV
+- **Embed Metadata**: Include title, artist, etc.
+- **Embed Thumbnail**: Include album art
 
->FORMAT
+## 🎯 Usage
 
-Choose the file format to download. The top format is for audio only, and the bottom format is for video and audio.
+1. **Enter URL**: Paste a video URL in the input field
+2. **Configure Settings**: Use the sidebar to adjust download options
+3. **Download**: Press Enter or click the Download button
+4. **Drag & Drop**: Alternatively, drag a URL directly into the app
 
-Support Fomat:
+### Playlist Mode
+Enable "Playlist Mode" in the sidebar to download entire playlists.
 
-Video:mp4, mkv,webm
+### Audio Only Mode
+Enable "Audio Only" to extract and download just the audio track.
 
-Audio:acc,flac,mp3,m4a,opus,vorbis,wav,webm
+## 🛠️ Development
 
+```bash
+# Install with dev dependencies
+uv sync --extra dev
 
->NOTIFICATION
+# Run linting
+uv run ruff check .
+uv run black .
 
-Choose whether or not to display a notification when the download is complete. The notification has the following functions:
+# Run tests
+uv run pytest
+```
 
-Play Button: Plays the downloaded file on the spot.
-Open Folder Button: Opens the folder where the downloaded file is located.
+## 📝 Notes
 
-| AUDIO | ###############################################################
+- FFmpeg is required for audio conversion and video merging
+- Place `ffmpeg.exe` and `ffprobe.exe` in the same directory or add to PATH
+- Windows notifications require the `win11toast` package (installed with `uv sync --extra windows`)
 
-(The following options are only available when downloading audio only.)
+## 🐛 Troubleshooting
 
->META
+- **App won't start**: Delete `vf_config.ini` and restart
+- **Download fails**: Ensure FFmpeg is installed and accessible
+- **No notifications**: Check system notification settings
 
-Choose whether or not to embed metadata when downloading audio only.
+## 📬 Feedback
 
->THUMBNAIL
+Found a bug or have suggestions? Please open an issue on GitHub!
 
-Choose whether or not to embed the thumbnail when downloading audio only.
+## 📄 License
 
-| OTHER | ###############################################################
+MIT License - See LICENSE file for details
 
->PLAYLIST
+## 👨‍💻 Author
 
-Enables downloading entire playlists. Since the program cannot automatically detect playlists, please enable this option only when downloading playlists. Otherwise, an "NA" folder will be generated inside the "Playlist" folder, and the downloaded files will be saved in there.
+Created by kurosiko
 
->AUDIO ONLY
-
-Downloads only the audio file. The format can be selected from the FORMAT option.
-
-| OTHER EXPLANATIONS | ###############################################################
-
->Input Box
-
-Paste the URL and press ENTER to start downloading.
-
->DND Support
-
-The program supports drag and drop.
-
->Task Bar Tray Icon
-
-The program displays a small icon on the taskbar. Right-click to select various options.
-
->Auto Download
-
-!!It is necessary to use the windows task scheduler etc. for complete automation!!
-Open config.ini and rewrite dl_latest to True, dl_channel url.
-If exit  = True,Automatically close the app when the automatic download is finished.
-Enter the channel url in . At that time, please delete the original "Channel URL 1" and "Channel URL 2". That's an example input.
-Don't remove the brackets.
-
-For bug reports and feedback, please visit the following GitHub page:
-
-| Github |
-
-https://github.com/kurosiko
+- Website: https://kurosiko.github.io/
+- Twitter: https://twitter.com/kurosiko
+- GitHub: https://github.com/kurosiko
